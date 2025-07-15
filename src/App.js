@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import axios from "axios";
 import Webcam from "react-webcam";
+import "./App.css"; // si quieres más estilos luego
 
 const API_URL = "https://72d2cdd55784.ngrok-free.app";
 
@@ -20,24 +21,6 @@ function App() {
     setImageFile(file);
     setPreview(URL.createObjectURL(file));
     setResult(null);
-  };
-
-  const captureFromWebcam = () => {
-    const screenshot = webcamRef.current.getScreenshot();
-    setPreview(screenshot);
-    setResult(null);
-
-    // Convertir base64 a archivo
-    const byteString = atob(screenshot.split(",")[1]);
-    const mimeString = screenshot.split(",")[0].split(":")[1].split(";")[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    const blob = new Blob([ab], { type: mimeString });
-    const file = new File([blob], "captura.jpg", { type: mimeString });
-    setImageFile(file);
   };
 
   const handleDetect = async () => {
@@ -82,44 +65,72 @@ function App() {
     }
   };
 
-  return (
-    <div style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
-      <h1>🧠 Detección de Objetos con YOLOv8</h1>
+  const handleCloseCamera = () => {
+    setUseCam(false);
+  };
 
-      <div style={{ marginBottom: 10 }}>
-        <button onClick={() => setUseCam(false)}>📂 Subir Imagen</button>
-        <button onClick={() => setUseCam(true)}>📸 Usar Cámara</button>
+  const handleClearPreview = () => {
+    setPreview(null);
+    setResult(null);
+  };
+
+  const handleClearVideo = () => {
+    setVideoFile(null);
+    setVideoURL(null);
+  };
+
+  return (
+    <div style={styles.container}>
+      <h1 style={styles.title}>🧠 Detección de Objetos con YOLOv8</h1>
+
+      <div style={styles.buttonGroup}>
+        <button style={styles.button} onClick={() => setUseCam(false)}>
+          📂 Subir Imagen
+        </button>
+        <button style={styles.button} onClick={() => setUseCam(true)}>
+          📸 Usar Cámara
+        </button>
       </div>
 
       {!useCam ? (
         <input type="file" accept="image/*" onChange={handleFileChange} />
       ) : (
-        <div>
+        <div style={styles.cameraContainer}>
           <h3>📺 Detección en vivo desde cámara:</h3>
           <img
             src={`${API_URL}/video_feed?source=cam`}
             alt="Stream de cámara"
             width={640}
             height={480}
-            style={{ border: "1px solid #ccc" }}
+            style={styles.videoBox}
           />
+          <button style={styles.closeButton} onClick={handleCloseCamera}>
+            ❌ Cerrar Cámara
+          </button>
         </div>
       )}
 
       {preview && (
-        <div style={{ marginTop: 10 }}>
+        <div style={styles.previewContainer}>
           <h3>🖼️ Vista previa:</h3>
           <img src={preview} alt="preview" width={300} />
+          <button style={styles.closeButton} onClick={handleClearPreview}>
+            ❌ Cerrar Imagen
+          </button>
         </div>
       )}
 
       <br />
-      <button onClick={handleDetect} disabled={loading}>
+      <button
+        style={styles.detectButton}
+        onClick={handleDetect}
+        disabled={loading}
+      >
         {loading ? "Detectando..." : "🔍 Detectar Objetos"}
       </button>
 
       {result && (
-        <div style={{ marginTop: 20 }}>
+        <div style={styles.resultContainer}>
           <h2>📦 Objetos Detectados:</h2>
           <img
             src={`data:image/jpeg;base64,${result.image}`}
@@ -140,20 +151,83 @@ function App() {
       <h2>🎥 Detección desde Video</h2>
       <input type="file" accept="video/*" onChange={handleVideoChange} />
       <br />
-      <button onClick={handleUploadVideo}>🔄 Subir y Procesar Video</button>
+      <button style={styles.button} onClick={handleUploadVideo}>
+        🔄 Subir y Procesar Video
+      </button>
 
       {videoURL && (
-        <div style={{ marginTop: 20 }}>
+        <div style={styles.videoContainer}>
           <h3>🎬 Video procesado:</h3>
-          <img
-            src={videoURL}
-            alt="Video procesado"
-            style={{ maxWidth: "100%" }}
-          />
+          <img src={videoURL} alt="Video procesado" style={styles.videoBox} />
+          <button style={styles.closeButton} onClick={handleClearVideo}>
+            ❌ Cerrar Video
+          </button>
         </div>
       )}
     </div>
   );
 }
+
+const styles = {
+  container: {
+    padding: 20,
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#f7f9fc",
+    color: "#333",
+    textAlign: "center",
+  },
+  title: {
+    color: "#2c3e50",
+  },
+  buttonGroup: {
+    marginBottom: 15,
+  },
+  button: {
+    margin: "0 5px",
+    padding: "10px 15px",
+    borderRadius: "5px",
+    backgroundColor: "#2980b9",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+  },
+  detectButton: {
+    marginTop: 10,
+    padding: "10px 25px",
+    borderRadius: "5px",
+    backgroundColor: "#27ae60",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+  },
+  closeButton: {
+    marginTop: 10,
+    padding: "5px 10px",
+    borderRadius: "5px",
+    backgroundColor: "#e74c3c",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+  },
+  previewContainer: {
+    marginTop: 20,
+  },
+  resultContainer: {
+    marginTop: 20,
+    textAlign: "left",
+    display: "inline-block",
+  },
+  videoContainer: {
+    marginTop: 20,
+  },
+  cameraContainer: {
+    marginTop: 10,
+  },
+  videoBox: {
+    border: "1px solid #ccc",
+    maxWidth: "100%",
+    borderRadius: "8px",
+  },
+};
 
 export default App;
