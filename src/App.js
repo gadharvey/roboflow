@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import axios from "axios";
 import Webcam from "react-webcam";
 
-const API_URL = "http://localhost:8000";
+const API_URL = "https://3d82cdf64346.ngrok-free.app/";
 
 function App() {
   const webcamRef = useRef(null);
