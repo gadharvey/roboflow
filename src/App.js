@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import axios from "axios";
 import Webcam from "react-webcam";
 
-const API_URL = "https://adfa2dd22f7b.ngrok-free.app";
+const API_URL = "https://72d2cdd55784.ngrok-free.app";
 
 function App() {
   const webcamRef = useRef(null);
@@ -95,15 +95,14 @@ function App() {
         <input type="file" accept="image/*" onChange={handleFileChange} />
       ) : (
         <div>
-          <Webcam
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width={320}
-            height={240}
-            videoConstraints={{ facingMode: "environment" }}
+          <h3>📺 Detección en vivo desde cámara:</h3>
+          <img
+            src={`${API_URL}/video_feed?source=cam`}
+            alt="Stream de cámara"
+            width={640}
+            height={480}
+            style={{ border: "1px solid #ccc" }}
           />
-          <br />
-          <button onClick={captureFromWebcam}>📸 Capturar Foto</button>
         </div>
       )}
 
